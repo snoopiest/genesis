@@ -103,6 +103,9 @@ const buildNotifiableData = (newData, notified) => {
         ? newData.steelPath
         : undefined
     );
+    data.archimedeas = wrap(() =>
+      newData.archimedeas?.filter((a) => !isExpired(a) && !notified.includes(a.id))
+    );
     data.syndicateM = wrap(() => newData.syndicateMissions.filter((m) => !notified.includes(m.id)));
     data.tweets = wrap(() =>
       newData.twitter ? newData.twitter.filter((t) => t && !notified.includes(t.uniqueId)) : []
@@ -321,6 +324,7 @@ export default class Notifier {
       conclave,
       outposts,
       steelPath,
+      archimedeas,
     } = notifiableData;
     const key = notifyKey(platform, locale);
     let claimedIds = new Set();
@@ -373,6 +377,7 @@ export default class Notifier {
       await wrapPromise(this.#sendArbitration(arbitration, deps));
       await wrapPromise(this.#sendSteelPath(steelPath, deps));
       await wrapPromise(this.#sendArchonHunt(archonHunt, deps));
+      await wrapPromise(this.#sendArchimedeas(archimedeas, deps));
     } catch (e) {
       logger.error(e);
     } finally {
@@ -653,6 +658,17 @@ export default class Notifier {
       })
     );
   };
+
+async #sendArchimedeas(newArchimedeas, deps) {
+  if (!newArchimedeas?.length) return;
+
+  return this.#standardBroadcast(newArchimedeas, {
+    Embed: embeds.Archimedeas,
+    type: 'archimedeas',
+    ...deps,
+  });
+}
+  
 
   async #sendNews(newNews, deps, type) {
     type = type || 'news';

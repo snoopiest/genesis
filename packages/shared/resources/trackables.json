@@ -27,6 +27,7 @@
     "other"
   ],
   "eventTypes": [
+    "archimedeas",
     "alerts",
     "invasions",
     "news",

@@ -332,7 +332,7 @@ export default class InteractionHandler extends BaseHandler {
   async recalcPerms(value: string, guild: Guild) {
     await this.#setGuildPerms(guild, value);
   }
-
+  
   static loadCommands = async (
     commands: ApplicationCommandManager | undefined,
     loadedFiles: InteractionConstructor[],

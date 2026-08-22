@@ -22,6 +22,7 @@ import Solaris from '#shared/embeds/SolarisEmbed';
 import Nightwave from '#shared/embeds/NightwaveEmbed';
 import Outposts from '#shared/embeds/SentientOutpostEmbed';
 import SteelPath from '#shared/embeds/SteelPathEmbed';
+import Archimedeas from '#shared/embeds/ArchimedeaEmbed';
 import { cmds, platformMap as platformChoices, syndicates as syndicateOptions } from '#shared/resources/index';
 import { isActive, isActiveArbitration } from '#shared/utilities/WorldState';
 
@@ -69,6 +70,7 @@ const embeds = {
   vallisCycle: Solaris,
   voidTrader: VoidTrader,
   sortie: Sortie,
+  Archimedea: Archimedeas,
 };
 const platformable = [
   {
@@ -112,7 +114,22 @@ const compactable = [
     description: 'Should all data be in one embed?',
   },
 ];
-
+const archimedeaChoices = [
+  {
+    name: 'All',
+    value: 'all',
+  },
+  {
+    name: 'Deep Archimedea',
+    value: 'C T_ L A B'
+  },
+    {
+    name: 'Temporal Archimedea',
+    value: 'C T_ H E X'
+  },
+];
+//HELPER TO KNOW WHEN WORLDSTATE IS LOADED WITHIN CONSOLE
+console.log('### WORLDSTATE MODULE LOADED ###');
 export default class WorldState extends Interaction {
   static enabled = games.includes('WARFRAME');
   static command = undefined;
@@ -243,6 +260,18 @@ export default class WorldState extends Interaction {
       options: platformable,
     },
     {
+      ...cmds.archimedeas,
+      options: [
+        {
+          type: Types.String,
+          name: 'type',
+          description: 'Which Archimedea?',
+          required: false,
+          choices: archimedeaChoices,
+        },
+      ]
+    },
+    {
       ...cmds.syndicate,
       options: [
         {
@@ -255,8 +284,15 @@ export default class WorldState extends Interaction {
         ...platformable,
       ],
     },
+    
   ];
 
+  static {
+  console.log(
+    'WorldState commands:',
+    this.commands.map((c) => c.name)
+  );
+  }
   static commandHandler = async (interaction, ctx) => {
     // args
     const language = ctx.language || 'en';
@@ -495,11 +531,67 @@ export default class WorldState extends Interaction {
         }
         return Collectors.dynamic(interaction, pages, ctx);
       }
+      case 'archimedeas': {
+        if (!data?.length) {
+          return interaction.editReply(ctx.i18n`No Archimedeas Active`);
+        }
+        // Which did the user request?
+        const requestedType =
+          interaction.options.getString('type') ?? 'all';
+        //Select EDA, ETA or both
+        const selected =
+          requestedType === 'all'
+            ? data
+            : data.filter((archimedea) => archimedea.type === requestedType);
+
+        //Build the embed
+        const archimedeaEmbeds = selected.map((archimedea) =>
+          new embeds.Archimedea(archimedea, {
+            
+            platform: 'PC',
+            i18n: ctx.i18n,
+            locale: language,
+        })
+      );
+      //Troubleshooting Block
+      console.log(
+        'RequestedType:', requestedType,
+        'Data Count:', data.length,
+        'Selected Count:', selected.length,
+        archimedeaEmbeds.map((embed) => embed.toJSON())
+      )
+
+      const payload = archimedeaEmbeds.map((embed) => embed.toJSON());
+
+      console.log(
+  'Sending embeds:',
+  payload.length,
+  payload.map((embed) => embed.title)
+      );
+
+      const reply = await interaction.editReply({
+  embeds: payload,
+      });
+
+      console.log(
+  'Discord returned:',
+  reply.embeds.length,
+  reply.embeds.map((embed) => embed.title)
+      );
+
+      return reply;
+      //End of Troubleshooting Block
+      return interaction.editReply({
+        embeds: archimedeaEmbeds,
+      });
+      }
       default:
         break;
     }
+
     return interaction.replied || interaction.deferred
       ? false
       : interaction.reply(withEphemeral(true, { content: 'got it' }));
   };
+  
 }

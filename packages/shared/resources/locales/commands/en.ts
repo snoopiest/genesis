@@ -72,6 +72,10 @@ export default {
     name: 'sortie',
     description: 'Get Sortie Information',
   },
+  archimedeas: {
+    name: 'archimedeas',
+    description: 'Get the latest Archimedea Information [TEST]',
+  },
   rooms: {
     name: 'rooms',
     description: 'Create and manage your private room',

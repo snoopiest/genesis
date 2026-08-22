@@ -25,6 +25,7 @@ import Outposts from '#shared/embeds/SentientOutpostEmbed';
 import SteelPath from '#shared/embeds/SteelPathEmbed';
 import Duviri from '#shared/embeds/DuviriEmbed';
 import RSS from '#shared/embeds/RSSEmbed';
+import Archimedeas from '#shared/embeds/ArchimedeaEmbed'
 
 export const i18ns = {};
 locales.forEach((locale) => {
@@ -55,6 +56,7 @@ export const embeds = {
   SteelPath,
   Duviri,
   RSS,
+  Archimedeas,
 };
 
 export const between = (activation, key, refreshRate, beats) => {
